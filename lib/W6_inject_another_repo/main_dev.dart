@@ -1,4 +1,4 @@
-import 'package:mobile/data/repositories/songs/song_repository_mock.dart';
+import 'package:mobile/W6_inject_another_repo/data/repositories/songs/song_repository_mock.dart';
 import 'package:provider/provider.dart';
 
 
