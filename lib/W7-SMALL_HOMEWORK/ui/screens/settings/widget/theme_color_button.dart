@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../model/settings/app_settings.dart';
 import '../../../theme/theme.dart' show AppColors;
- 
+
 class ThemeColorButton extends StatelessWidget {
   const ThemeColorButton({
     super.key,
