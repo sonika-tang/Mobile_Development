@@ -41,7 +41,7 @@ class SongRepositoryMock implements SongRepository {
 
   @override
   Future<List<Song>> fetchSongs() async {
-    await Future.delayed(Duration(minutes: 3));
+    await Future.delayed(Duration(seconds: 3));
 
     _fetchCount++;
     if (_fetchCount % 2 == 0) {
