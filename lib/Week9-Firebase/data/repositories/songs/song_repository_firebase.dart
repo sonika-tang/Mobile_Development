@@ -11,7 +11,7 @@ class SongRepositoryFirebase extends SongRepository {
     'week-8-practice-e27cc-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
   static final Uri songUrl = baseUri.replace(path: '/songs.json');
-  static final Uri artistUrl = baseUri.replace(path: '/artists.json');
+  // static final Uri artistUrl = baseUri.replace(path: '/artists.json');
 
   @override
   Future<List<Song>> fetchSongs() async {
@@ -33,5 +33,17 @@ class SongRepositoryFirebase extends SongRepository {
   }
 
   @override
-  Future<Song?> fetchSongById(String id) async {}
+  Future<Song?> fetchSongById(String id) async {
+    final songId = baseUri.replace(path: '/songs/$id.json');
+
+    final response = await http.get(songId);
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      if (body == null) return null;
+      return SongDto.fromJson(id, body);
+    }
+
+    throw Exception('Failed to fetch song $id. Status: ${response.statusCode}');
+  }
 }
