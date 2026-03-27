@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/Week9-Firebase/model/artists/artists.dart';
 import 'package:mobile/Week9-Firebase/ui/screens/artist/view_model/artist_view_model.dart';
-import 'package:mobile/Week9-Firebase/ui/screens/artist/widgets/artist_tile.dart';
 import 'package:mobile/Week9-Firebase/ui/utils/async_value.dart';
+import 'package:mobile/Week9-Firebase/ui/widgets/artist/artist_tile.dart';
 import 'package:provider/provider.dart';
 
 import '../../../theme/theme.dart';
