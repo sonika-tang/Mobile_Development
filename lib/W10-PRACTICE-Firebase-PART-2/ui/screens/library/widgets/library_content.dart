@@ -32,18 +32,21 @@ class LibraryContent extends StatelessWidget {
 
       case AsyncValueState.success:
         final List<LibraryItemData> data = asyncValue.data!;
-        content = ListView.builder(
-          itemCount: data.length,
-          itemBuilder: (context, index) {
-            final item = data[index];
-            return LibraryItemTile(
-              data: item,
-              isPlaying: mv.isSongPlaying(item.song),
-              isLiking: mv.likingInProgressSongId == item.song.id,
-              onTap: () => mv.start(item.song),
-              onLike: () => mv.likeSong(item.song),
-            );
-          },
+        content = RefreshIndicator(
+          onRefresh: () => mv.fetchSong(forceFetch: true),
+          child: ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              final item = data[index];
+              return LibraryItemTile(
+                data: item,
+                isPlaying: mv.isSongPlaying(item.song),
+                isLiking: mv.likingInProgressSongId == item.song.id,
+                onTap: () => mv.start(item.song),
+                onLike: () => mv.likeSong(item.song),
+              );
+            },
+          ),
         );
     }
 

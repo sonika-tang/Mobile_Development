@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
- 
+
 import '../../../../model/artist/artist.dart';
 import '../../../theme/theme.dart';
 import '../../../utils/async_value.dart';
@@ -12,30 +12,29 @@ class ArtistsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1- Read the globbal song repository
     ArtistsViewModel mv = context.watch<ArtistsViewModel>();
-
     AsyncValue<List<Artist>> asyncValue = mv.artistsValue;
 
     Widget content;
     switch (asyncValue.state) {
       case AsyncValueState.loading:
-        content = Center(child: CircularProgressIndicator());
+        content = const Center(child: CircularProgressIndicator());
         break;
       case AsyncValueState.error:
         content = Center(
           child: Text(
             'error = ${asyncValue.error!}',
-            style: TextStyle(color: Colors.red),
+            style: const TextStyle(color: Colors.red),
           ),
         );
-
+        break;
       case AsyncValueState.success:
         List<Artist> artists = asyncValue.data!;
         content = ListView.builder(
           itemCount: artists.length,
           itemBuilder: (context, index) => ArtistTile(artist: artists[index]),
         );
+        break;
     }
 
     return Padding(
@@ -43,10 +42,20 @@ class ArtistsContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 16),
-          Text("Library", style: AppTextStyles.heading),
-          SizedBox(height: 50),
-
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Library", style: AppTextStyles.heading),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.blueAccent),
+                onPressed: () {
+                  mv.fetchArtists(forceFetch: true);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 50),
           Expanded(child: content),
         ],
       ),

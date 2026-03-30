@@ -12,8 +12,20 @@ class SongRepositoryFirebase extends SongRepository {
   );
   static final Uri songUrl = baseUri.replace(path: '/songs.json');
 
+  List<Song>? _cachedSongs;
+
   @override
-  Future<List<Song>> fetchSongs() async {
+  Future<List<Song>> fetchSongs({bool forceFetch = false}) async {
+    if (!forceFetch && _cachedSongs != null) {
+      return _cachedSongs!;
+    }
+
+    final songs = await fetchSongsAPI();
+    _cachedSongs = songs;
+    return songs;
+  }
+
+  Future<List<Song>> fetchSongsAPI() async {
     final http.Response response = await http.get(songUrl);
 
     if (response.statusCode == 200) {
@@ -45,8 +57,6 @@ class SongRepositoryFirebase extends SongRepository {
 
     throw Exception('Failed to fetch song $id. Status: ${response.statusCode}');
   }
-
-  List<Song>? _cachedSongs;
 
   @override
   Future<void> likeSong(String songId, int currentLikes) async {

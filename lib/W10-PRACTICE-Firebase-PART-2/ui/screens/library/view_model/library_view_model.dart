@@ -39,32 +39,51 @@ class LibraryViewModel extends ChangeNotifier {
     fetchSong();
   }
 
-  void fetchSong() async {
+  Future<void> fetchSong({bool forceFetch = false}) async {
     // 1- Loading state
     data = AsyncValue.loading();
     notifyListeners();
 
     try {
-      // 1- Fetch songs
-      List<Song> songs = await songRepository.fetchSongs();
+      // // 1- Fetch songs
+      // List<Song> songs = await songRepository.fetchSongs();
 
-      // 2- Fethc artist
-      List<Artist> artists = await artistRepository.fetchArtists();
+      // // 2- Fethc artist
+      // List<Artist> artists = await artistRepository.fetchArtists();
 
-      // 3- Create the mapping artistid-> artist
-      Map<String, Artist> mapArtist = {};
-      for (Artist artist in artists) {
-        mapArtist[artist.id] = artist;
-      }
+      // // 3- Create the mapping artistid-> artist
+      // Map<String, Artist> mapArtist = {};
+      // for (Artist artist in artists) {
+      //   mapArtist[artist.id] = artist;
+      // }
 
-      List<LibraryItemData> data = songs
+      // List<LibraryItemData> data = songs
+      //     .map(
+      //       (song) =>
+      //           LibraryItemData(song: song, artist: mapArtist[song.artistId]!),
+      //     )
+      //     .toList();
+
+      // this.data = AsyncValue.success(data);
+      final List<Song> songs = await songRepository.fetchSongs(
+        forceFetch: forceFetch,
+      );
+      final List<Artist> artists = await artistRepository.fetchArtists(
+        forceFetch: forceFetch,
+      );
+
+      final Map<String, Artist> artistMap = {
+        for (final artist in artists) artist.id: artist,
+      };
+
+      final List<LibraryItemData> items = songs
           .map(
             (song) =>
-                LibraryItemData(song: song, artist: mapArtist[song.artistId]!),
+                LibraryItemData(song: song, artist: artistMap[song.artistId]!),
           )
           .toList();
 
-      this.data = AsyncValue.success(data);
+      data = AsyncValue.success(items);
     } catch (e) {
       // 3- Fetch is unsucessfull
       data = AsyncValue.error(e);
