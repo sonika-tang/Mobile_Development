@@ -18,24 +18,32 @@ class LibraryContent extends StatelessWidget {
 
     Widget content;
     switch (asyncValue.state) {
-      
       case AsyncValueState.loading:
         content = Center(child: CircularProgressIndicator());
         break;
       case AsyncValueState.error:
-        content = Center(child: Text('error = ${asyncValue.error!}', style: TextStyle(color: Colors.red),));
+        content = Center(
+          child: Text(
+            'error = ${asyncValue.error!}',
+            style: TextStyle(color: Colors.red),
+          ),
+        );
+        break;
 
       case AsyncValueState.success:
-        List<LibraryItemData> data = asyncValue.data!;
+        final List<LibraryItemData> data = asyncValue.data!;
         content = ListView.builder(
           itemCount: data.length,
-          itemBuilder: (context, index) => LibraryItemTile(
-            data: data[index],
-            isPlaying: mv.isSongPlaying(data[index].song),
-            onTap: () {
-              mv.start(data[index].song);
-            },
-          ),
+          itemBuilder: (context, index) {
+            final item = data[index];
+            return LibraryItemTile(
+              data: item,
+              isPlaying: mv.isSongPlaying(item.song),
+              isLiking: mv.likingInProgressSongId == item.song.id,
+              onTap: () => mv.start(item.song),
+              onLike: () => mv.likeSong(item.song),
+            );
+          },
         );
     }
 

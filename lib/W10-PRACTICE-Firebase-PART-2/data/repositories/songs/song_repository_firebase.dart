@@ -7,22 +7,22 @@ import '../../dtos/song_dto.dart';
 import 'song_repository.dart';
 
 class SongRepositoryFirebase extends SongRepository {
-  final Uri songsUri = Uri.https(
-    'test-a2a77-default-rtdb.asia-southeast1.firebasedatabase.app',
-    '/songs.json',
+  static final Uri baseUri = Uri.https(
+    'week-8-practice-e27cc-default-rtdb.asia-southeast1.firebasedatabase.app',
   );
+  static final Uri songUrl = baseUri.replace(path: '/songs.json');
 
   @override
   Future<List<Song>> fetchSongs() async {
-    final http.Response response = await http.get(songsUri);
+    final http.Response response = await http.get(songUrl);
 
     if (response.statusCode == 200) {
       // 1 - Send the retrieved list of songs
       Map<String, dynamic> songJson = json.decode(response.body);
-
       List<Song> result = [];
-      for (final entry in songJson.entries) {
-        result.add(SongDto.fromJson(entry.key, entry.value));
+
+      for (var iteration in songJson.entries) {
+        result.add(SongDto.fromJson(iteration.key, iteration.value));
       }
       return result;
     } else {
@@ -32,5 +32,44 @@ class SongRepositoryFirebase extends SongRepository {
   }
 
   @override
-  Future<Song?> fetchSongById(String id) async {}
+  Future<Song?> fetchSongById(String id) async {
+    final songId = baseUri.replace(path: '/songs/$id.json');
+
+    final response = await http.get(songId);
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      if (body == null) return null;
+      return SongDto.fromJson(id, body);
+    }
+
+    throw Exception('Failed to fetch song $id. Status: ${response.statusCode}');
+  }
+
+  List<Song>? _cachedSongs;
+
+  @override
+  Future<void> likeSong(String songId, int currentLikes) async {
+    final uri = baseUri.replace(path: '/songs/$songId.json');
+
+    final response = await http.patch(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({SongDto.likesKey: currentLikes + 1}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to like song $songId (status ${response.statusCode})',
+      );
+    }
+
+    // Update cache if present
+    if (_cachedSongs != null) {
+      _cachedSongs = [
+        for (final song in _cachedSongs!)
+          song.id == songId ? song.copyWith(likes: currentLikes + 1) : song,
+      ];
+    }
+  }
 }

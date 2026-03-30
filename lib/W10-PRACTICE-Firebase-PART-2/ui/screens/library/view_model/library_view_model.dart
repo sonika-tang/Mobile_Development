@@ -15,6 +15,9 @@ class LibraryViewModel extends ChangeNotifier {
 
   AsyncValue<List<LibraryItemData>> data = AsyncValue.loading();
 
+  String? _likingInProgressSongId;
+  String? get likingInProgressSongId => _likingInProgressSongId;
+
   LibraryViewModel({
     required this.songRepository,
     required this.playerState,
@@ -62,11 +65,39 @@ class LibraryViewModel extends ChangeNotifier {
           .toList();
 
       this.data = AsyncValue.success(data);
-
     } catch (e) {
       // 3- Fetch is unsucessfull
       data = AsyncValue.error(e);
     }
+    notifyListeners();
+  }
+
+  Future<void> likeSong(Song song) async {
+    _likingInProgressSongId = song.id;
+    notifyListeners();
+
+    try {
+      await songRepository.likeSong(song.id, song.likes);
+
+      // Refresh the list from the (already-updated) cache so the new count shows
+      if (data.data != null) {
+        final updated = data.data!.map((item) {
+          if (item.song.id == song.id) {
+            return LibraryItemData(
+              song: item.song.copyWith(likes: song.likes + 1),
+              artist: item.artist,
+            );
+          }
+          return item;
+        }).toList();
+        data = AsyncValue.success(updated);
+      }
+    } catch (e) {
+      // Surface the error without losing the current list
+      data = AsyncValue.error(e);
+    }
+
+    _likingInProgressSongId = null;
     notifyListeners();
   }
 
